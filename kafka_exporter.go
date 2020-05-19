@@ -398,8 +398,10 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				for topic, partitions := range offsetFetchResponse.Blocks {
 					// If the topic is not consumed by that consumer group, skip it
 					topicConsumed := false
+					plog.Errorf("1111 %s: %v", topic, partitions)
 					for _, offsetFetchResponseBlock := range partitions {
 						// Kafka will return -1 if there is no offset associated with a topic-partition under that consumer group
+						plog.Errorf("22222, %s", offsetFetchResponseBlock.Offset)
 						if offsetFetchResponseBlock.Offset != -1 {
 							topicConsumed = true
 							break
