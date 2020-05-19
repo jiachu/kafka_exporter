@@ -370,6 +370,9 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			plog.Errorf("Cannot get consumer group: %v", err)
 			return
 		}
+
+		plog.Errorf("groups: %v", groups)
+
 		groupIds := make([]string, 0)
 		for groupId := range groups.Groups {
 			if e.groupFilter.MatchString(groupId) {
@@ -377,11 +380,16 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			}
 		}
 
+		plog.Errorf("groupIds: %v", groupIds)
+
 		describeGroups, err := broker.DescribeGroups(&sarama.DescribeGroupsRequest{Groups: groupIds})
 		if err != nil {
 			plog.Errorf("Cannot get describe groups: %v", err)
 			return
 		}
+
+		plog.Errorf("describeGroups: %v", describeGroups)
+
 		for _, group := range describeGroups.Groups {
 			offsetFetchRequest := sarama.OffsetFetchRequest{ConsumerGroup: group.GroupId, Version: 1}
 			for topic, partitions := range offset {
