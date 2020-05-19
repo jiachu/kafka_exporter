@@ -371,7 +371,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			return
 		}
 
-		plog.Errorf("groups: %v", groups)
+		plog.Infof("groups: %v", groups)
 
 		groupIds := make([]string, 0)
 		for groupId := range groups.Groups {
@@ -380,15 +380,11 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 			}
 		}
 
-		plog.Errorf("groupIds: %v", groupIds)
-
 		describeGroups, err := broker.DescribeGroups(&sarama.DescribeGroupsRequest{Groups: groupIds})
 		if err != nil {
 			plog.Errorf("Cannot get describe groups: %v", err)
 			return
 		}
-
-		plog.Errorf("describeGroups: %v", describeGroups)
 
 		for _, group := range describeGroups.Groups {
 			offsetFetchRequest := sarama.OffsetFetchRequest{ConsumerGroup: group.GroupId, Version: 1}
@@ -406,16 +402,15 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				for topic, partitions := range offsetFetchResponse.Blocks {
 					// If the topic is not consumed by that consumer group, skip it
 					topicConsumed := false
-					plog.Errorf("1111 %s: %v", topic, partitions)
 					for _, offsetFetchResponseBlock := range partitions {
 						// Kafka will return -1 if there is no offset associated with a topic-partition under that consumer group
-						plog.Errorf("22222, %s", offsetFetchResponseBlock.Offset)
 						if offsetFetchResponseBlock.Offset != -1 {
 							topicConsumed = true
 							break
 						}
 					}
 					if topicConsumed {
+						plog.Infof("notice ... consumer group")
 						var currentOffsetSum int64
 						var lagSum int64
 						for partition, offsetFetchResponseBlock := range partitions {
